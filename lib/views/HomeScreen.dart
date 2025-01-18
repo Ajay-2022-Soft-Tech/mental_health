@@ -1,18 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:mental_health/views/smart_watch_screen.dart';
 
+// Main Entry Point
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Meditation App',
+      home: HomeScreen(),
+    );
+  }
+}
+
+// Home Screen with Bottom Navigation Bar
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
   // Navigation Screens
   final List<Widget> _screens = [
     HomeScreenContent(),
-    StressDetectorScreen(),
-    ProgressScreen(ratings: {},),
+    SmartwatchScreen(),
+    ProgressScreen(ratings: {}),
+    MeditationPathsScreen(),
   ];
 
   @override
@@ -36,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           BottomNavigationBarItem(icon: Icon(Icons.spa), label: 'Meditation'),
           BottomNavigationBarItem(icon: Icon(Icons.watch), label: 'Watch'),
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Progress'),
+          BottomNavigationBarItem(icon: Icon(Icons.support_agent), label: 'Chat'),
         ],
       ),
     );
@@ -97,7 +117,7 @@ class HomeScreenContent extends StatelessWidget {
             SizedBox(height: 16),
             GestureDetector(
               onTap: () {
-                Navigator.pushNamed(context, '/course');
+                // Add your functionality here
               },
               child: _buildMeditationCard(
                 title: "Let it go",
@@ -119,8 +139,9 @@ class HomeScreenContent extends StatelessWidget {
               ),
             ),
             SizedBox(height: 16),
+
+            // Category Chips
             _buildCategoryChips(),
-            SizedBox(height: 16),
 
             // Meditation Cards
             Expanded(
@@ -277,237 +298,40 @@ class HomeScreenContent extends StatelessWidget {
   }
 }
 
-// Placeholder for Stress Detector Screen
-class StressDetectorScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text("Stress Detector Screen"),
-      ),
-    );
-  }
-}
+// Smartwatch Screen Placeholder
 
-// Placeholder for Progress Screen
+// Progress Screen Placeholder
 class ProgressScreen extends StatelessWidget {
   final Map<int, int> ratings;
 
   ProgressScreen({required this.ratings});
 
-  String getFeedback(double averageRating) {
-    if (averageRating >= 4.0) {
-      return "🌟 Excellent! Keep maintaining your healthy habits!";
-    } else if (averageRating >= 3.0) {
-      return "😊 Good! There's still some room for improvement.";
-    } else if (averageRating >= 2.0) {
-      return "⚠️ Consider working on improving your habits.";
-    } else {
-      return "❗ Significant changes or help may be needed.";
-    }
-  }
-
-  Color getFeedbackColor(double averageRating) {
-    if (averageRating >= 4.0) {
-      return Colors.greenAccent;
-    } else if (averageRating >= 3.0) {
-      return Colors.blueAccent;
-    } else if (averageRating >= 2.0) {
-      return Colors.orangeAccent;
-    } else {
-      return Colors.redAccent;
-    }
-  }
-
-  String getRatingDescription(int rating) {
-    switch (rating) {
-      case 5:
-        return "Excellent";
-      case 4:
-        return "Good";
-      case 3:
-        return "Average";
-      case 2:
-        return "Below Average";
-      case 1:
-      default:
-        return "Poor";
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    double averageRating =
-        ratings.values.reduce((a, b) => a + b) / ratings.values.length;
-
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF957DAD), Color(0xFFDABFFF)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+      body: Center(
+        child: Text(
+          "Progress Screen",
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Header
-                Text(
-                  "Your Results",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 16),
+      ),
+    );
+  }
+}
 
-                // Summary Card
-                Card(
-                  elevation: 8,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Container(
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      gradient: LinearGradient(
-                        colors: [
-                          getFeedbackColor(averageRating),
-                          getFeedbackColor(averageRating).withOpacity(0.7),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Average Score: ${averageRating.toStringAsFixed(1)} / 5",
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          getFeedback(averageRating),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white70,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20),
-
-                // Detailed Ratings
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: ratings.length,
-                    itemBuilder: (context, index) {
-                      final questionIndex = index + 1;
-                      final rating = ratings[index] ?? 0;
-                      final ratingColor = getFeedbackColor(rating.toDouble());
-
-                      return Card(
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        margin: EdgeInsets.symmetric(vertical: 8),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            radius: 30,
-                            backgroundColor: ratingColor.withOpacity(0.2),
-                            child: Icon(
-                              Icons.star,
-                              size: 30,
-                              color: ratingColor,
-                            ),
-                          ),
-                          title: Text(
-                            "Question $questionIndex",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          subtitle: Text(
-                            "Rating: $rating (${getRatingDescription(rating)})",
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                // Restart and Go to Home Buttons
-                SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context); // Restart questionnaire
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black87,
-                        padding:
-                        EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                      ),
-                      child: Text(
-                        "Restart",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/home'); // Navigate to Home
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        foregroundColor: Colors.white,
-                        padding:
-                        EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                      ),
-                      child: Text(
-                        "Go to Home",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+// Meditation Paths Screen
+class MeditationPathsScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Meditation Paths"),
+        backgroundColor: Colors.blueAccent,
+      ),
+      body: Center(
+        child: Text(
+          "Meditation Paths Screen",
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
     );
