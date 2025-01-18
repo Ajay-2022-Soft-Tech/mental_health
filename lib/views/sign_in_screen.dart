@@ -133,7 +133,7 @@ class _SignInScreenState extends State<SignInScreen>
                 // Guest Button
                 InteractiveButton(
                   onTap: () {
-                    Navigator.pushReplacementNamed(context, '/home');
+                    Navigator.pushReplacementNamed(context, '/question');
                   },
                   label: "Continue as Guest",
                   imagePath: 'assets/images/guest_icon.png',

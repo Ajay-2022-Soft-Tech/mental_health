@@ -9,6 +9,7 @@ import 'package:mental_health/views/HomeScreen.dart';
 import 'package:mental_health/views/break_remainder_screen.dart';
 import 'package:mental_health/views/course_screen.dart';
 import 'package:mental_health/views/mindfullness_screen.dart';
+import 'package:mental_health/views/questionare_screen.dart';
 import 'package:mental_health/views/track_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -45,8 +46,9 @@ class SelfCareApp extends StatelessWidget {
         ),
         initialRoute: '/',
         routes: {
-          '/': (context) => SignInScreen(),
+          '/': (context) => HomeScreen(),
           '/home': (context) => HomeScreen(),
+          '/question': (context) => HackathonQuestionnaireScreen(),
           '/break': (context) => BreakReminderScreen(),
           '/hydration': (context) => HydrationScreen(),
           '/mood': (context) => MoodTrackingScreen(),
