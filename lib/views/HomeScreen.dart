@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mental_health/views/smart_watch_screen.dart';
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 // Main Entry Point
 void main() {
@@ -31,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
     HomeScreenContent(),
     SmartwatchScreen(),
     ProgressScreen(ratings: {}),
-    MeditationPathsScreen(),
+    ChatBotScreen(),
   ];
 
   @override
@@ -320,19 +323,171 @@ class ProgressScreen extends StatelessWidget {
 }
 
 // Meditation Paths Screen
-class MeditationPathsScreen extends StatelessWidget {
+
+class ChatBotScreen extends StatefulWidget {
+  @override
+  _ChatBotScreenState createState() => _ChatBotScreenState();
+}
+
+class _ChatBotScreenState extends State<ChatBotScreen> {
+  final List<Map<String, String>> _messages = [];
+  final TextEditingController _messageController = TextEditingController();
+  bool _isTyping = false;
+
+  final String _apiKey = "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"; // Replace with your OpenAI API Key
+
+  // Function to send a message
+  void _sendMessage() async {
+    if (_messageController.text.trim().isNotEmpty) {
+      final userMessage = _messageController.text.trim();
+
+      setState(() {
+        _messages.add({
+          'sender': 'user',
+          'message': userMessage,
+        });
+        _isTyping = true;
+      });
+
+      _messageController.clear();
+
+      // Call OpenAI API to get the chatbot's response
+      final botResponse = await _getBotResponse(userMessage);
+
+      setState(() {
+        _messages.add({
+          'sender': 'bot',
+          'message': botResponse,
+        });
+        _isTyping = false;
+      });
+    }
+  }
+
+  // Function to get bot response from OpenAI API
+  Future<String> _getBotResponse(String userMessage) async {
+    const String apiUrl = "https://api.openai.com/v1/chat/completions";
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $_apiKey",
+        },
+        body: jsonEncode({
+          "model": "gpt-3.5-turbo",
+          "messages": [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": userMessage},
+          ],
+          "max_tokens": 100,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['choices'][0]['message']['content'].trim();
+      } else {
+        return "Sorry, I couldn't process your request. Please try again later.";
+      }
+    } catch (e) {
+      return "An error occurred. Please check your internet connection.";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Meditation Paths"),
+        title: Text('ChatBot'),
         backgroundColor: Colors.blueAccent,
       ),
-      body: Center(
-        child: Text(
-          "Meditation Paths Screen",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
+      body: Column(
+        children: [
+          // Chat Messages
+          Expanded(
+            child: ListView.builder(
+              reverse: true,
+              padding: const EdgeInsets.all(8.0),
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                final message = _messages[_messages.length - index - 1];
+                final isUser = message['sender'] == 'user';
+
+                return Align(
+                  alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 4.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 10.0,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isUser ? Colors.blueAccent : Colors.grey.shade200,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
+                        bottomLeft: isUser ? Radius.circular(12) : Radius.zero,
+                        bottomRight: isUser ? Radius.zero : Radius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      message['message']!,
+                      style: TextStyle(
+                        color: isUser ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          if (_isTyping) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(width: 10),
+                  Text(
+                    "Assistant is typing...",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
+          // Message Input
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _messageController,
+                    decoration: InputDecoration(
+                      hintText: 'Type your message...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey.shade200,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8),
+                FloatingActionButton(
+                  onPressed: _sendMessage,
+                  backgroundColor: Colors.blueAccent,
+                  child: Icon(Icons.send),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
