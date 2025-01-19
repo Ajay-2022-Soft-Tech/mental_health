@@ -321,7 +321,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
   final TextEditingController _messageController = TextEditingController();
   bool _isTyping = false;
 
-  final String _apiKey = "AIzaSyBw13hNKVP4mXUwAl4Ah8gskJJwIwpXWVA"; // Replace with your OpenAI API Key
+  final String _apiKey = ""; // Replace with your OpenAI API Key
 
 
   // Function to send a message
