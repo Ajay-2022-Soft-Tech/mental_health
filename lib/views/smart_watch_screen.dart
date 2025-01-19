@@ -13,7 +13,11 @@ class _SmartwatchScreenState extends State<SmartwatchScreen>
   bool _isConnected = false;
   double _progress = 0.0;
 
-  // Mock Data
+  // Mock Data for discovered Bluetooth devices
+  final List<String> _mockDevices = ["FitBand MI 4", "HealthSync Pro", "SmartTracker X"];
+  String _selectedDevice = "";
+
+  // Data retrieved after connection
   int _heartRate = 0;
   String _sleepCycle = '';
   String _stressLevel = '';
@@ -35,56 +39,51 @@ class _SmartwatchScreenState extends State<SmartwatchScreen>
     super.dispose();
   }
 
-  /// Load connection state from SharedPreferences
-
-
-  /// Save connection state to SharedPreferences
-
-  /// Start the smartwatch connection process
-  void _startConnection() {
+  // Simulate Bluetooth Discovery Process
+  Future<void> _startDeviceDiscovery() async {
     setState(() {
       _isConnecting = true;
       _progress = 0.0;
     });
 
-    Timer.periodic(Duration(milliseconds: 100), (timer) {
-      setState(() {
-        _progress += 0.05;
-
-        if (_progress >= 1.0) {
-          timer.cancel();
-          _completeConnection();
-        }
+    for (int i = 0; i <= 20; i++) {
+      await Future.delayed(Duration(milliseconds: 100), () {
+        setState(() {
+          _progress += 0.05;
+        });
       });
-    });
+
+      if (i == 20) {
+        _completeConnection();
+      }
+    }
   }
 
-  /// Complete the connection process and save the state
+  // Complete the connection process
   void _completeConnection() {
     setState(() {
       _isConnecting = false;
       _isConnected = true;
+      _selectedDevice = _mockDevices[Random().nextInt(_mockDevices.length)];
 
-      // Generate mock data
+      // Generate mock health data
       _heartRate = Random().nextInt(40) + 60; // Heart rate: 60-100 BPM
       _sleepCycle = Random().nextBool() ? "Good" : "Disturbed";
       _stressLevel = Random().nextBool() ? "Low" : "High";
     });
 
-    // _saveConnectionState(true); // Save the connected state
     _animationController.forward(from: 0.0);
   }
 
-  /// Disconnect from the smartwatch and clear the state
+  // Disconnect from the smartwatch
   void _disconnect() {
     setState(() {
       _isConnected = false;
+      _selectedDevice = "";
       _heartRate = 0;
       _sleepCycle = '';
       _stressLevel = '';
     });
-
-    // _saveConnectionState(false); // Save the disconnected state
   }
 
   @override
@@ -114,23 +113,23 @@ class _SmartwatchScreenState extends State<SmartwatchScreen>
                 ),
                 SizedBox(height: 20),
 
-                // Animation or Data
+                // Main Section
                 Expanded(
                   child: _isConnecting
-                      ? _buildConnectingUI()
+                      ? _buildDeviceDiscoveryUI()
                       : _isConnected
                       ? _buildConnectedUI()
                       : _buildDisconnectedUI(),
                 ),
 
-                // Button
+                // Action Button
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _isConnecting
                       ? null
                       : _isConnected
                       ? _disconnect
-                      : _startConnection,
+                      : _startDeviceDiscovery,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _isConnecting
                         ? Colors.grey
@@ -162,8 +161,8 @@ class _SmartwatchScreenState extends State<SmartwatchScreen>
     );
   }
 
-  // Connecting UI
-  Widget _buildConnectingUI() {
+  // Device Discovery UI
+  Widget _buildDeviceDiscoveryUI() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -173,7 +172,7 @@ class _SmartwatchScreenState extends State<SmartwatchScreen>
         ),
         SizedBox(height: 20),
         Text(
-          "Connecting to your smartwatch...",
+          "Searching for nearby devices...",
           style: TextStyle(color: Colors.white, fontSize: 16),
         ),
         SizedBox(height: 10),
@@ -181,6 +180,8 @@ class _SmartwatchScreenState extends State<SmartwatchScreen>
           "${(_progress * 100).toInt()}% Complete",
           style: TextStyle(color: Colors.white70),
         ),
+        SizedBox(height: 20),
+        _buildMockDeviceList(),
       ],
     );
   }
@@ -193,6 +194,11 @@ class _SmartwatchScreenState extends State<SmartwatchScreen>
         ScaleTransition(
           scale: _animationController,
           child: Icon(Icons.watch, color: Colors.white, size: 100),
+        ),
+        SizedBox(height: 20),
+        Text(
+          "Connected to $_selectedDevice",
+          style: TextStyle(color: Colors.white, fontSize: 18),
         ),
         SizedBox(height: 20),
         _buildDataCard(
@@ -272,6 +278,25 @@ class _SmartwatchScreenState extends State<SmartwatchScreen>
           ],
         ),
       ),
+    );
+  }
+
+  // Mock Bluetooth Device List
+  Widget _buildMockDeviceList() {
+    return Column(
+      children: _mockDevices
+          .map((device) => ListTile(
+        leading: Icon(Icons.bluetooth, color: Colors.white),
+        title: Text(
+          device,
+          style: TextStyle(color: Colors.white),
+        ),
+        trailing: Text(
+          "Nearby",
+          style: TextStyle(color: Colors.greenAccent),
+        ),
+      ))
+          .toList(),
     );
   }
 }

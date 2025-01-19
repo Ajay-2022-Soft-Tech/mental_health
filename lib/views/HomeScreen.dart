@@ -3,22 +3,8 @@ import 'package:mental_health/views/smart_watch_screen.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mental_health/views/weekly_progress_screen.dart';
 
-// Main Entry Point
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Meditation App',
-      home: HomeScreen(),
-    );
-  }
-}
 
 // Home Screen with Bottom Navigation Bar
 class HomeScreen extends StatefulWidget {
@@ -33,7 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _screens = [
     HomeScreenContent(),
     SmartwatchScreen(),
-    ProgressScreen(ratings: {}),
+    WeeklyProgressScreen(),
     ChatBotScreen(),
   ];
 
@@ -324,6 +310,7 @@ class ProgressScreen extends StatelessWidget {
 
 // Meditation Paths Screen
 
+
 class ChatBotScreen extends StatefulWidget {
   @override
   _ChatBotScreenState createState() => _ChatBotScreenState();
@@ -334,7 +321,8 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
   final TextEditingController _messageController = TextEditingController();
   bool _isTyping = false;
 
-  final String _apiKey = "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"; // Replace with your OpenAI API Key
+  final String _apiKey = "AIzaSyBw13hNKVP4mXUwAl4Ah8gskJJwIwpXWVA"; // Replace with your OpenAI API Key
+
 
   // Function to send a message
   void _sendMessage() async {
@@ -389,9 +377,11 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
         final data = jsonDecode(response.body);
         return data['choices'][0]['message']['content'].trim();
       } else {
+        print("Error: ${response.statusCode} - ${response.body}");
         return "Sorry, I couldn't process your request. Please try again later.";
       }
     } catch (e) {
+      print("Error: $e");
       return "An error occurred. Please check your internet connection.";
     }
   }
@@ -399,95 +389,163 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('ChatBot'),
-        backgroundColor: Colors.blueAccent,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(60.0),
+        child: AppBar(
+          title: Text(
+            'ChatBot',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+          ),
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.blueAccent, Colors.lightBlue],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+          elevation: 5,
+        ),
       ),
-      body: Column(
-        children: [
-          // Chat Messages
-          Expanded(
-            child: ListView.builder(
-              reverse: true,
-              padding: const EdgeInsets.all(8.0),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final message = _messages[_messages.length - index - 1];
-                final isUser = message['sender'] == 'user';
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.white, Color(0xFFF2F3F5)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Column(
+          children: [
+            // Chat Messages
+            Expanded(
+              child: ListView.builder(
+                reverse: true,
+                padding: const EdgeInsets.all(8.0),
+                itemCount: _messages.length,
+                itemBuilder: (context, index) {
+                  final message = _messages[_messages.length - index - 1];
+                  final isUser = message['sender'] == 'user';
 
-                return Align(
-                  alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 4.0),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 10.0,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isUser ? Colors.blueAccent : Colors.grey.shade200,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(12),
-                        topRight: Radius.circular(12),
-                        bottomLeft: isUser ? Radius.circular(12) : Radius.zero,
-                        bottomRight: isUser ? Radius.zero : Radius.circular(12),
+                  return Align(
+                    alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 6.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 12.0,
+                      ),
+                      constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.7),
+                      decoration: BoxDecoration(
+                        color: isUser
+                            ? Colors.blueAccent.withOpacity(0.9)
+                            : Colors.white,
+                        gradient: isUser
+                            ? LinearGradient(
+                          colors: [Colors.blueAccent, Colors.lightBlue],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                            : null,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(12),
+                          topRight: Radius.circular(12),
+                          bottomLeft: isUser ? Radius.circular(12) : Radius.zero,
+                          bottomRight: isUser ? Radius.zero : Radius.circular(12),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        message['message']!,
+                        style: TextStyle(
+                          color: isUser ? Colors.white : Colors.black87,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
-                    child: Text(
-                      message['message']!,
-                      style: TextStyle(
-                        color: isUser ? Colors.white : Colors.black87,
+                  );
+                },
+              ),
+            ),
+
+            // Typing Indicator
+            if (_isTyping) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Row(
+                  children: [
+                    CircularProgressIndicator(strokeWidth: 2, color: Colors.blueAccent),
+                    SizedBox(width: 10),
+                    Text(
+                      "Assistant is typing...",
+                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            // Message Input
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _messageController,
+                      style: TextStyle(fontSize: 16),
+                      decoration: InputDecoration(
+                        hintText: 'Type your message...',
+                        hintStyle: TextStyle(color: Colors.grey),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
                       ),
                     ),
                   ),
-                );
-              },
-            ),
-          ),
-
-          if (_isTyping) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(width: 10),
-                  Text(
-                    "Assistant is typing...",
-                    style: TextStyle(color: Colors.grey),
+                  SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: _sendMessage,
+                    child: Container(
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [Colors.blueAccent, Colors.lightBlue],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.4),
+                            blurRadius: 8,
+                            offset: Offset(2, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(Icons.send, color: Colors.white),
+                    ),
                   ),
                 ],
               ),
             ),
           ],
-
-          // Message Input
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: InputDecoration(
-                      hintText: 'Type your message...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey.shade200,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 8),
-                FloatingActionButton(
-                  onPressed: _sendMessage,
-                  backgroundColor: Colors.blueAccent,
-                  child: Icon(Icons.send),
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

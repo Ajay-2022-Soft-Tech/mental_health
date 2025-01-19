@@ -46,7 +46,7 @@ class SelfCareApp extends StatelessWidget {
         ),
         initialRoute: '/',
         routes: {
-          '/': (context) => HomeScreen(),
+          '/': (context) => SignInScreen(),
           '/home': (context) => HomeScreen(),
           '/question': (context) => HackathonQuestionnaireScreen(),
           '/break': (context) => BreakReminderScreen(),
